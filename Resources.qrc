@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/imgs">
+        <file>imgs/Copy.bmp</file>
+        <file>imgs/Cut.bmp</file>
+        <file>imgs/Open.bmp</file>
+        <file>imgs/Paste.bmp</file>
+        <file>imgs/Save.bmp</file>
+    </qresource>
+</RCC>
