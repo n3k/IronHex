@@ -12,7 +12,7 @@ QWidget *ItemDelegate::createEditor(QWidget *parent,
                                     const QStyleOptionViewItem &option,
                                     const QModelIndex &index) const
 {
-    QRegularExpression rx("[a|b|c|d|e|f|\\d]{2}");
+    QRegularExpression rx("[aA|bB|cC|dD|eE|fF|\\d]{2}");
     QValidator *validator = new QRegularExpressionValidator(rx, parent);
 
     QLineEdit *editor = new QLineEdit(parent);

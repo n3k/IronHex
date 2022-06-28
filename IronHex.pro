@@ -14,6 +14,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    irontable.h \
     itemdelegate.h \
     mainwindow.h
 

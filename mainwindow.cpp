@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "itemdelegate.h"
+#include <QClipboard>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -125,3 +126,42 @@ Feature list
 . Implement copy/paste
 . Implement copy from selection
 */
+
+void MainWindow::on_tableWidget_ctrlCPressed(QModelIndexList selected)
+{
+    QString str;
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    for (auto it = selected.begin(); it != selected.end(); ++it) {
+        str += it->data().toString() + " ";
+    }
+    str = str.mid(0, str.length() - 1);
+    clipboard->setText(str);
+}
+
+
+void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
+{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    QString text          = clipboard->text();
+
+    /* The following regex expects to have a single match */
+    // Ex: 23 23 23 65 6E 6E 20 34 2E 78 3A 20
+    // Other input will have multiple matches:
+    // Ex: AAAAAAA -> multiple matches from the regex.
+    // Other option is to not have matches at all
+    // Ex: XZZXZXZXZX
+    // So the later two cases are the ones that we will treat differently.
+    // If there is a single match, we know we have the same format we get from CTRL+C.
+    // If there are multiple matches or no matches at all, then we treat it as arbitrary data
+    QRegularExpression rx("([aA|bB|cC|dD|eE|fF|\\d]{2}\\s)*[aA|bB|cC|dD|eE|fF|\\d]{2}");
+    QRegularExpressionMatch match = rx.match(text);
+
+    if (match.hasMatch()) {
+        for (int i = 0 ; i < match.capturedTexts().size(); i++) {
+            QString str = match.capturedTexts().at(i);
+            //match.
+            QMessageBox::warning(this, "Warning", str);
+        }
+    }
+}
+

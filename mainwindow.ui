@@ -91,7 +91,10 @@
       </widget>
      </item>
      <item row="2" column="0" colspan="3">
-      <widget class="QTableWidget" name="tableWidget">
+      <widget class="IronTable" name="tableWidget">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
        </attribute>
@@ -289,6 +292,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>IronTable</class>
+   <extends>QTableWidget</extends>
+   <header location="global">irontable.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="Resources.qrc"/>
  </resources>
