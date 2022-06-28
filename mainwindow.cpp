@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "itemdelegate.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -8,9 +9,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setCentralWidget(ui->gridLayoutWidget);
 
-    //this->m_offset_savedText = ui->textEdit_offset->toPlainText();
-    //this->m_ = m_ui->myLabel->text();
-    //m_ui->myLabel->setText(this->m_savedText.arg("Default text"));
+    this->ui->tableWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+    ItemDelegate *itDelegate = new  ItemDelegate;
+    ui->tableWidget->setItemDelegate(itDelegate);
 }
 
 MainWindow::~MainWindow()
@@ -18,47 +20,87 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::update_text_areas(QString &text) {
-
-    // Prepare offset text area
-    QString offset_text = "";
-    for (int i = 0; i < text.length(); i += 16) {
-        QString str;
-        offset_text += str.sprintf("%08xh\n", i);
+QString get_non_ascii_chars_version(QString &text) {
+    QString result;
+    result.reserve(text.size());
+    foreach (const QChar& c, text) {
+        if (c.isPrint()) {
+            result += c;
+        } else {
+            result += ".";
+        }
     }
 
-    // Prepare ascii-data text area
-    QString ascii_data_text = "";
+    return result;
+}
+
+void MainWindow::update_text_areas(QByteArray &text) {
+
     size_t text_len = text.length();
+    size_t lines_16 = text_len >> 4;
+    lines_16 += ((text_len & 0b111) != 0) ? 1: 0;
+    size_t rows = lines_16;
+
+    const size_t column_num = ui->tableWidget->columnCount();
+
+    QVector<QString> offset_vec;
+    QVector<QByteArray> data_vec;
+
     size_t p = 0;
+    QString str1;
+    QByteArray str;
     while (p < text_len) {
         size_t rem = text_len - p;
+        offset_vec.push_back(str1.sprintf("%08zxh", p));
         if (rem < 16) {
-            ascii_data_text += text.mid(p, p+rem);
+            str = text.mid(p, rem);
         } else {
-            ascii_data_text += text.mid(p, p+16);
+            str = text.mid(p, 16);
         }
+
+        data_vec.push_back(str);
         p += 16;
-        ascii_data_text += "\n";
     }
 
-    // Prepare hexdump text area
-    QString hexdump_text = "";
-//    for (int i = 0; i < text.length(); i++) {
-//        QString str;
-//        if ( (i + 1) % 16 != 0 ) {
-//            hexdump_text += str.sprintf("%02X  ", text.at(i));
-//        } else {
-//            hexdump_text += str.sprintf("%02X\n", text.at(i));
-//        }
-//    }
+    for(size_t i = 0; i < rows; i++) {
+        ui->tableWidget->insertRow ( ui->tableWidget->rowCount() );
 
+        QByteArray data_line = data_vec.at(i);
 
-    // Set text areas
-    ui->textEdit_asciidata->setPlainText(ascii_data_text);
-    ui->textEdit_offset->setPlainText(offset_text);
-    ui->textEdit_hexdump->setPlainText(hexdump_text);
+        for(size_t j = 0; j < column_num; j++)
+        {
+            QTableWidgetItem *item = ui->tableWidget->item(i, j);
+            if(!item) {
+                item = new QTableWidgetItem();
+                ui->tableWidget->setItem(i, j, item);
+            }
 
+            if (j == COLUMN_OFFSET) {
+                item->setText(offset_vec.at(i));
+                item->setBackgroundColor(Qt::lightGray);
+                item->setFlags(Qt::ItemIsEnabled);
+            } else if (j == COLUMN_ASCII_DATA) {
+                QString ascii_data = QString(data_line);
+                item->setText(get_non_ascii_chars_version(ascii_data));
+                item->setBackgroundColor(Qt::lightGray);
+                item->setFlags(Qt::ItemIsEnabled);
+            } else {
+                // HEXDUMP COLUMNS
+                QString hexbyte_str;
+                int column_idx = j-1;
+                if (column_idx < data_line.size()) {
+                    unsigned char b = (unsigned char) data_line.at(column_idx);
+                    item->setText(hexbyte_str.sprintf("%02X", b));
+                    item->setTextAlignment(Qt::AlignCenter);
+                }
+            }
+        }
+    }
+
+    ui->tableWidget->resizeColumnsToContents();
+
+    offset_vec.clear();
+    data_vec.clear();
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -71,9 +113,15 @@ void MainWindow::on_actionOpen_triggered()
         QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
     }
     setWindowTitle(filename);
-    QTextStream in(&file);
-    QString text = in.readAll();
+    //QTextStream in(&file);
+    QByteArray text = file.readAll();
     update_text_areas(text);
     file.close();
 }
 
+/*
+Feature list
+. Determine strings and mark them with a different background colour in the hexdump
+. Implement copy/paste
+. Implement copy from selection
+*/

@@ -12,6 +12,9 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+#define COLUMN_OFFSET 0
+#define COLUMN_ASCII_DATA 17
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -24,7 +27,7 @@ private slots:
     void on_actionOpen_triggered();
 
 private:
-    void update_text_areas(QString &text);
+    void update_text_areas(QByteArray &text);
     Ui::MainWindow *ui;
     QString currentFile = "";
 

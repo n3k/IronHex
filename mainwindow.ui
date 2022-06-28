@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>819</width>
-    <height>498</height>
+    <width>1019</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>804</width>
-      <height>461</height>
+      <width>1001</width>
+      <height>501</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_2">
@@ -39,110 +39,18 @@
      <property name="horizontalSpacing">
       <number>2</number>
      </property>
-     <item row="0" column="0">
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="minimumSize">
+     <item row="1" column="0" colspan="3">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
         <size>
-         <width>110</width>
-         <height>0</height>
+         <width>40</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>110</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="placeholderText">
-        <string>Offset 00h</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QTextEdit" name="textEdit_offset">
-       <property name="minimumSize">
-        <size>
-         <width>110</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>110</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;0xFFFFFFFF&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="label_2">
-       <property name="minimumSize">
-        <size>
-         <width>490</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>490</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>  00     01     02      03     04     05     06     07     08    09     0A     0B     0C     0D     0E     0F</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QLabel" name="label_3">
-       <property name="minimumSize">
-        <size>
-         <width>160</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>160</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>ASCII - DATA</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
+      </spacer>
      </item>
      <item row="0" column="1">
       <widget class="QPushButton" name="pushButton">
@@ -163,105 +71,120 @@ hr { height: 1px; border-width: 0; }
        </property>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QTextEdit" name="textEdit_asciidata">
+     <item row="0" column="0">
+      <widget class="QLineEdit" name="lineEdit">
        <property name="minimumSize">
         <size>
-         <width>160</width>
+         <width>110</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>160</width>
+         <width>110</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
+       <property name="placeholderText">
+        <string>Offset 00h</string>
        </property>
-       <property name="readOnly">
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="3">
+      <widget class="QTableWidget" name="tableWidget">
+       <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;0123456789abcdef&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="3">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label">
-       <property name="minimumSize">
-        <size>
-         <width>110</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>110</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>OFFSET</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QTextEdit" name="textEdit_hexdump">
-       <property name="minimumSize">
-        <size>
-         <width>490</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>490</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;AA  AA  AA  AA  BB  BB  BB  BB  CC  CC  CC  CC  DD  DD  DD  DD&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>OFFSET</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>00</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>01</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>02</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>03</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>04</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>05</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>06</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>07</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>08</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>09</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0A</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0B</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0C</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0D</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0E</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0F</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>ASCII - DATA</string>
+        </property>
+       </column>
       </widget>
      </item>
     </layout>
@@ -272,7 +195,7 @@ hr { height: 1px; border-width: 0; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>819</width>
+     <width>1019</width>
      <height>22</height>
     </rect>
    </property>
