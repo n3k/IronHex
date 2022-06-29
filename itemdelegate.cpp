@@ -1,11 +1,17 @@
+#pragma once
 #include "itemdelegate.h"
 #include <QLineEdit>
 //#include <QIntValidator>
 #include <QRegularExpressionValidator>
+#include "mainwindow.h"
 
 ItemDelegate::ItemDelegate(QObject *parent) :
     QItemDelegate(parent)
 {
+}
+
+void ItemDelegate::set_main_window(QMainWindow *window) {
+    this->main_window = window;
 }
 
 QWidget *ItemDelegate::createEditor(QWidget *parent,
@@ -38,6 +44,9 @@ void ItemDelegate::setModelData(QWidget *editor,
     QLineEdit *line = static_cast<QLineEdit*>(editor);
     QString value = line->text().toUpper();
     model->setData(index, value);
+    //MainWindow *window = (MainWindow *) this->main_window;
+    //window->re_load_ascii_area();
+
 }
 
 

@@ -8,12 +8,16 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QModelIndexList>
+#include <QRegularExpression>
+#include <QTableWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 #define COLUMN_OFFSET 0
+#define COLUMN_FIRST_HEX_BYTE 1
+#define COLUMN_LAST_HEX_BYTE  16
 #define COLUMN_ASCII_DATA 17
 
 class MainWindow : public QMainWindow
@@ -24,20 +28,37 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void re_load_ascii_area();
+
 private slots:
     void on_actionOpen_triggered();
 
     void on_tableWidget_ctrlCPressed(QModelIndexList selected);
     void on_tableWidget_ctrlVPressed(int r, int c);
 
+
+    void on_actionSave_As_triggered();
+    void on_actionSave_triggered();
+
+    void on_actionClose_triggered();
+
 private:
-    void update_text_areas(QByteArray &text);
+    bool bInitialLoadDone;
+    void re_load_table_content(QByteArray &text);
+    void reload_content();
+    void next_hex_cell(int *r, int *c);
+    void find_strings_in_data(QByteArray &data);
+    void set_strings_bg_color();
+
+
     Ui::MainWindow *ui;
     QString currentFile = "";
 
-    QString m_hexdump_savedText;
-    QString m_offset_savedText;
-    QString m_ascii_data_savedText;
+    QByteArray _content;
+
+    QRegularExpression rx_copypaste;
+
+    QMap<int, int> qstring_map;
 
 
 

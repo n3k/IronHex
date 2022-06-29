@@ -2,12 +2,18 @@
 #define ITEMDELEGATE_H
 
 #include <QItemDelegate>
+#include <QMainWindow>
 
 class ItemDelegate : public QItemDelegate
 {
     Q_OBJECT
+
+private:
+    QMainWindow *main_window;
+
 public:
     explicit ItemDelegate(QObject *parent = 0);
+    void set_main_window(QMainWindow *window);
 
 protected:
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
