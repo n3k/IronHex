@@ -15,11 +15,31 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->rx_copypaste = QRegularExpression("([aA|bB|cC|dD|eE|fF|\\d]{2}\\s)*[aA|bB|cC|dD|eE|fF|\\d]{2}");
 
+    this->table1_ctx.table = this->ui->tableWidget;
+    this->table2_ctx.table = this->ui->tableWidget_2;
+
     this->ui->tableWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    this->ui->tableWidget_2->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
     ItemDelegate *itDelegate = new  ItemDelegate;
     itDelegate->set_main_window(this);
     ui->tableWidget->setItemDelegate(itDelegate);
+
+    ItemDelegate *itDelegate2 = new  ItemDelegate;
+    itDelegate2->set_main_window(this);
+    ui->tableWidget_2->setItemDelegate(itDelegate2);
+
+    ui->tableWidget_2->resizeColumnsToContents();
+
+//    connect(view1->horizontalScrollBar(), SIGNAL(valueChanged(int)), view2->horizontalScrollBar(), SLOT(setValue(int)));
+//    connect(view2->horizontalScrollBar(), SIGNAL(valueChanged(int)), view1->horizontalScrollBar(), SLOT(setValue(int)));
+
+      connect(this->ui->verticalScrollBar, SIGNAL(valueChanged(int)), this->ui->tableWidget->verticalScrollBar(), SLOT(setValue(int)));
+      connect(this->ui->verticalScrollBar, SIGNAL(valueChanged(int)), this->ui->tableWidget_2->verticalScrollBar(), SLOT(setValue(int)));
+
+      connect(this->ui->tableWidget->verticalScrollBar(),
+              SIGNAL(rangeChanged(int, int)),
+              this->ui->verticalScrollBar, SLOT(setRange(int, int)));
 }
 
 MainWindow::~MainWindow()
@@ -41,16 +61,16 @@ QString get_non_ascii_chars_version(QByteArray &ba) {
     return result;
 }
 
-void MainWindow::reload_content() {
-    _content.clear();
+void MainWindow::reload_content(struct TableContext *t_ctx) {
+    t_ctx->_content.clear();
 
     QString text = "";
-    for(int i = 0 ; i < this->_content_rows; i++) {
+    for(int i = 0 ; i < t_ctx->_content_rows; i++) {
         for (int j = COLUMN_FIRST_HEX_BYTE; j <= COLUMN_LAST_HEX_BYTE; j++) {
 
-            QTableWidgetItem *item = ui->tableWidget->item(i, j);
+            QTableWidgetItem *item = t_ctx->table->item(i, j);
 
-            if (i == (_content_rows - 1) && j > _content_last_column) {
+            if (i == (t_ctx->_content_rows - 1) && j > t_ctx->_content_last_column) {
                 // This case is where we're on the last row and we consumed
                 // all the columns with data for this row.
                 break;
@@ -66,17 +86,17 @@ void MainWindow::reload_content() {
 //                QString str;
 //                QMessageBox::warning(this, "Warning", str.sprintf("0D found: %02x", v));
 //            }
-            _content.push_back(v & 0xff);
+            t_ctx->_content.push_back(v & 0xff);
         }
     }
 }
 
 /// This method only reloads the ascii-strings portion of the table
-void MainWindow::re_load_ascii_area() {
+void MainWindow::re_load_ascii_area(struct TableContext *t_ctx) {
     // Get the bytes from the current hexdump and reload
-    reload_content();
+    reload_content(t_ctx);
 
-    size_t text_len = _content.length();
+    size_t text_len = t_ctx->_content.length();
     QVector<QByteArray> data_vec;
 
     size_t p = 0;
@@ -84,19 +104,19 @@ void MainWindow::re_load_ascii_area() {
     while (p < text_len) {
         size_t rem = text_len - p;
         if (rem < 16) {
-            str = _content.mid(p, rem);
+            str = t_ctx->_content.mid(p, rem);
         } else {
-            str = _content.mid(p, 16);
+            str = t_ctx->_content.mid(p, 16);
         }
 
         data_vec.push_back(str);
         p += 16;
     }
 
-    for(int i = 0 ; i < _content_rows; i++) {
+    for(int i = 0 ; i < t_ctx->_content_rows; i++) {
         QByteArray data_line = data_vec.at(i);
 
-        QTableWidgetItem *item = ui->tableWidget->item(i, COLUMN_ASCII_DATA);
+        QTableWidgetItem *item = t_ctx->table->item(i, COLUMN_ASCII_DATA);
         //printf("Reloading ascii row: %d - %p\n", i, item);
         item->setText(get_non_ascii_chars_version(data_line));
         item->setBackgroundColor(Qt::lightGray);
@@ -107,17 +127,17 @@ void MainWindow::re_load_ascii_area() {
 
 /// This method will load or reload the entire content of the table
 /// based on the input bytearray
-void MainWindow::re_load_table_content(QByteArray &text) {
+void MainWindow::re_load_table_content(QByteArray &text, struct TableContext *t_ctx) {
 
-    ui->tableWidget->clearContents();
+    t_ctx->table->clearContents();
 
     size_t text_len = text.size();
     size_t lines_16 = text_len >> 4;
     lines_16 += ((text_len & 0b1111) != 0) ? 1: 0;
     size_t needed_rows = lines_16;
-    this->_content_rows = needed_rows;
+    t_ctx->_content_rows = needed_rows;
 
-    const size_t column_num = ui->tableWidget->columnCount();
+    const size_t column_num = t_ctx->table->columnCount();
 
     QVector<QString> offset_vec;
     QVector<QByteArray> data_vec;
@@ -139,10 +159,10 @@ void MainWindow::re_load_table_content(QByteArray &text) {
     }
 
     // Allocate ROWs for current content
-    int additional_rows = needed_rows - ui->tableWidget->rowCount();
+    int additional_rows = needed_rows - t_ctx->table->rowCount();
 
     while (additional_rows > 0) {
-        ui->tableWidget->insertRow ( ui->tableWidget->rowCount() );
+        t_ctx->table->insertRow ( t_ctx->table->rowCount() );
         additional_rows--;
     }
 
@@ -154,10 +174,10 @@ void MainWindow::re_load_table_content(QByteArray &text) {
         for(size_t j = 0; j < column_num; j++)
         {
 
-            QTableWidgetItem *item = ui->tableWidget->item(i, j);
+            QTableWidgetItem *item = t_ctx->table->item(i, j);
             if(!item) {
                 item = new QTableWidgetItem();
-                ui->tableWidget->setItem(i, j, item);
+                t_ctx->table->setItem(i, j, item);
             }
 
             if (j == COLUMN_OFFSET) {
@@ -183,18 +203,16 @@ void MainWindow::re_load_table_content(QByteArray &text) {
                 offset++;
 
                 if (offset == text_len) {
-                    _content_last_column = j;
+                    t_ctx->_content_last_column = j;
                 }
             }
         }
     }
 
-    ui->tableWidget->resizeColumnsToContents();
+    t_ctx->table->resizeColumnsToContents();
 
     offset_vec.clear();
     data_vec.clear();
-
-    bInitialLoadDone = true;
 }
 
 size_t ascii_strlen(char *s) {
@@ -211,8 +229,8 @@ void MainWindow::map_offset_to_cell(size_t offset, int *r, int *c) {
     *c = (offset & 0b1111) + COLUMN_FIRST_HEX_BYTE;
 }
 
-void MainWindow::find_strings_in_data(QByteArray &data) {
-    qstring_map.clear();
+void MainWindow::find_strings_in_data(QByteArray &data, struct TableContext *t_ctx) {
+    t_ctx->string_map.clear();
 
     int i = 0;
     size_t str_len = 0;
@@ -226,7 +244,7 @@ void MainWindow::find_strings_in_data(QByteArray &data) {
             if (str_len >= 3) {
                 //QString str;
                 //QMessageBox::warning(this, "Warning", str.sprintf("%d:%d:%s", i, str_len, ptr));
-                this->qstring_map[i] = str_len;
+                t_ctx->string_map[i] = str_len;
                 i += str_len;
             } else {
                 i += 2;
@@ -239,12 +257,13 @@ void MainWindow::find_strings_in_data(QByteArray &data) {
 
 void MainWindow::on_actionOpen_triggered()
 {
-    _content.clear();
-    this->ui->tableWidget->setRowCount(0);
+    this->table1_ctx._content.clear();
+    this->table1_ctx.table->setRowCount(0);
+
     bInitialLoadDone = false;
 
     QString filename = QFileDialog::getOpenFileName(this, "Open the file");
-    currentFile = filename;
+    currentFile1 = filename;
 
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -256,22 +275,22 @@ void MainWindow::on_actionOpen_triggered()
     QByteArray text = file.readAll();
 
     // find strings
-    find_strings_in_data(text);
+    find_strings_in_data(text, &this->table1_ctx);
 
     // fill table
-    //this->ui->tableWidget->clear();
-    re_load_table_content(text);
+    re_load_table_content(text, &this->table1_ctx);
+    bInitialLoadDone = true;
 
     // set color for strings
-    set_strings_bg_color();
+    set_strings_bg_color(&this->table1_ctx);
 
 
     file.close();
 }
 
-void MainWindow::set_strings_bg_color() {
+void MainWindow::set_strings_bg_color(struct TableContext *t_ctx) {
 
-    for (auto it = qstring_map.begin(); it != qstring_map.end(); ++it) {
+    for (auto it = t_ctx->string_map.begin(); it != t_ctx->string_map.end(); ++it) {
         int cur_row = 0;
         int cur_col = 0;
         map_offset_to_cell(it.key(), &cur_row, &cur_col);
@@ -279,9 +298,9 @@ void MainWindow::set_strings_bg_color() {
         for (int i = 0; i < it.value(); i++) {
             //QString str;
             //QMessageBox::warning(this, "Warning", str.sprintf("r[%d]c[%d]", cur_row, cur_col));
-            QTableWidgetItem *item = this->ui->tableWidget->item(cur_row, cur_col);
-            item->setBackgroundColor(Qt::green);
-            next_hex_cell(&cur_row, &cur_col);
+            QTableWidgetItem *item = t_ctx->table->item(cur_row, cur_col);
+            item->setBackgroundColor(Qt::yellow);
+            next_hex_cell(&cur_row, &cur_col, t_ctx);
         }
     }
 }
@@ -295,7 +314,7 @@ Feature list
 
 /// This function receives a row and column index and returns the
 /// next row and column indexes
-void MainWindow::next_hex_cell(int *r, int *c) {
+void MainWindow::next_hex_cell(int *r, int *c, struct TableContext *t_ctx) {
 
     QTableWidgetItem *item;
     bool bNextRow = false;
@@ -311,17 +330,17 @@ void MainWindow::next_hex_cell(int *r, int *c) {
     *c = col;
 
     int row = *r;
-    if (row == (_content_rows - 1)) {
+    if (row == (t_ctx->_content_rows - 1)) {
 
         // If we re on the last ROW and our increased COLUMN is greater than what we tracked before
         // Then increase the _content_last_column (to col)
-        if (col > _content_last_column) {
-             _content_last_column = col;
+        if (col > t_ctx->_content_last_column) {
+             t_ctx->_content_last_column = col;
              // Add new item
-             item = this->ui->tableWidget->item(row, col);
+             item = t_ctx->table->item(row, col);
              if (item == NULL) {
                  QMessageBox::warning(this, "Warning", "adding new COL");
-                 ui->tableWidget->setItem(row, col, new QTableWidgetItem());
+                 t_ctx->table->setItem(row, col, new QTableWidgetItem());
              }
         }
     }
@@ -330,19 +349,19 @@ void MainWindow::next_hex_cell(int *r, int *c) {
         // This means we wrapped around the cols
         row++;
 
-        if (row > (_content_rows - 1)) {
+        if (row > (t_ctx->_content_rows - 1)) {
             // Need to add a new row
             // printf("Adding a new row, because r[%d] and c[%d] - last_column: %d\n", row, col, _content_last_column);
 
-            ui->tableWidget->insertRow ( ui->tableWidget->rowCount() );
-            _content_rows++;
-            _content_last_column = col;
+            t_ctx->table->insertRow ( t_ctx->table->rowCount() );
+            t_ctx->_content_rows++;
+            t_ctx->_content_last_column = col;
 
             // Add all the COLUMNS to the new ROW
             for (int j = COLUMN_OFFSET; j <= COLUMN_ASCII_DATA; j++) {
-                item = this->ui->tableWidget->item(row, j);
+                item = t_ctx->table->item(row, j);
                 if (item == NULL) {
-                    ui->tableWidget->setItem(row, j, new QTableWidgetItem());
+                    t_ctx->table->setItem(row, j, new QTableWidgetItem());
                 }
             }
         }
@@ -353,8 +372,8 @@ void MainWindow::next_hex_cell(int *r, int *c) {
     }
 }
 
-void MainWindow::on_tableWidget_ctrlCPressed(QModelIndexList selected)
-{
+
+void MainWindow::handle_ctrl_c(QModelIndexList selected) {
     QString str;
     QClipboard *clipboard = QGuiApplication::clipboard();
     for (auto it = selected.begin(); it != selected.end(); ++it) {
@@ -364,9 +383,18 @@ void MainWindow::on_tableWidget_ctrlCPressed(QModelIndexList selected)
     clipboard->setText(str);
 }
 
-
-void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
+void MainWindow::on_tableWidget_ctrlCPressed(QModelIndexList selected)
 {
+    handle_ctrl_c(selected);
+}
+
+void MainWindow::on_tableWidget_2_ctrlCPressed(QModelIndexList selected)
+{
+    handle_ctrl_c(selected);
+}
+
+
+void MainWindow::handle_ctrl_v(int r, int c, struct TableContext *t_ctx) {
     if (c == COLUMN_OFFSET || c == COLUMN_ASCII_DATA) {
         return;
     }
@@ -399,10 +427,10 @@ void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
             QStringList hexbyte_list = text.split(" ");
             for (int i = 0 ; i < hexbyte_list.size(); i++) {
                 QString hexbyte_str = hexbyte_list.at(i);
-                QTableWidgetItem *item = ui->tableWidget->item(cur_row, cur_col);
+                QTableWidgetItem *item = t_ctx->table->item(cur_row, cur_col);
                 item->setText(hexbyte_str.toUpper());
                 item->setTextAlignment(Qt::AlignCenter);
-                next_hex_cell(&cur_row, &cur_col);
+                next_hex_cell(&cur_row, &cur_col, t_ctx);
             }
         }
     }
@@ -417,7 +445,7 @@ void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
         while (j < new_data.size()) {
             unsigned char b = (unsigned char) new_data.at(j);
             //printf("Setting val to r[%d]c[%d] - max-rows: %d - last_col: %d\n", cur_row, cur_col, _content_rows, _content_last_column);
-            QTableWidgetItem *item = ui->tableWidget->item(cur_row, cur_col);
+            QTableWidgetItem *item = t_ctx->table->item(cur_row, cur_col);
             QString hexbyte_str;
             item->setText(hexbyte_str.sprintf("%02X", b));
             item->setTextAlignment(Qt::AlignCenter);
@@ -425,23 +453,32 @@ void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
             if (j == new_data.size()) {
                 break;
             }
-            next_hex_cell(&cur_row, &cur_col);
+            next_hex_cell(&cur_row, &cur_col, t_ctx);
         }
     }
 
-    re_load_ascii_area();
-    find_strings_in_data(_content);
-    set_strings_bg_color();
+    re_load_ascii_area(t_ctx);
+    find_strings_in_data(t_ctx->_content, t_ctx);
+    set_strings_bg_color(t_ctx);
+}
 
+void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
+{
+    this->handle_ctrl_v(r, c, &this->table1_ctx);
+}
+
+void MainWindow::on_tableWidget_2_ctrlVPressed(int r, int c)
+{
+    this->handle_ctrl_v(r, c, &this->table2_ctx);
 }
 
 
 void MainWindow::on_actionSave_As_triggered()
 {
-    reload_content();
+    reload_content(&this->table1_ctx);
 
     QString filename = QFileDialog::getSaveFileName(this, "Save as");
-    currentFile = filename;
+    currentFile1 = filename;
 
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly)) {
@@ -450,7 +487,7 @@ void MainWindow::on_actionSave_As_triggered()
 
     setWindowTitle(filename);
 
-    file.write(_content);
+    file.write(this->table1_ctx._content);
 
     file.close();
 }
@@ -458,14 +495,14 @@ void MainWindow::on_actionSave_As_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-    reload_content();
+    reload_content(&this->table1_ctx);
 
-    QFile file(currentFile);
+    QFile file(currentFile1);
     if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::warning(this, "Warning", "Cannot write file: " + file.errorString());
     }
 
-    file.write(_content);
+    file.write(this->table1_ctx._content);
 
     file.close();
 }
@@ -473,11 +510,20 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_actionClose_triggered()
 {
-    _content.clear();
-    this->_content_last_column = 0;
-    this->_content_rows        = 0;
+    this->table1_ctx._content.clear();
+    this->table2_ctx._content.clear();
+    this->table1_ctx.string_map.clear();
+    this->table2_ctx.string_map.clear();
+    this->table1_ctx._content_rows = 0;
+    this->table2_ctx._content_rows = 0;
+    this->table1_ctx._content_last_column = 0;
+    this->table2_ctx._content_last_column = 0;
 
-    this->ui->tableWidget->clearContents();
+
+    this->table1_ctx.table->clearContents();
+    this->table2_ctx.table->clearContents();
+
+    bInitialLoadDone = false;
 }
 
 
@@ -496,5 +542,61 @@ void MainWindow::on_actionPaste_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     exit(0);
+}
+
+
+void MainWindow::on_actionLoad2_triggered()
+{
+    if (!this->bInitialLoadDone) {
+        QMessageBox::warning(this, "Warning", "Primary table was not filled in!");
+        return;
+    }
+
+    this->table2_ctx._content.clear();
+    this->table2_ctx.table->setRowCount(0);
+
+    QString filename = QFileDialog::getOpenFileName(this, "Open the file");
+    currentFile2 = filename;
+
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
+    }
+
+    QByteArray text = file.readAll();
+
+    // fill table
+    re_load_table_content(text, &this->table2_ctx);
+
+
+    do_diff();
+
+    file.close();
+}
+
+
+void MainWindow::do_diff() {
+    reload_content(&this->table1_ctx);
+    reload_content(&this->table2_ctx);
+
+    int len1 = this->table1_ctx._content.size();
+    int len2 = this->table2_ctx._content.size();
+
+    int len_to_cmp = len1 <= len2 ? len1 : len2;
+
+    int cur_row = 0;
+    int cur_col = 0;
+
+    for (int i = 0; i < len_to_cmp; i++) {
+        if (this->table1_ctx._content.at(i) != this->table2_ctx._content.at(i)) {
+            map_offset_to_cell(i, &cur_row, &cur_col);
+
+            QTableWidgetItem *item = table2_ctx.table->item(cur_row, cur_col);
+            item->setBackgroundColor(Qt::red);
+        }
+    }
+
+
+
 }
 

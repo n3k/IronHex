@@ -1,4 +1,3 @@
-#pragma once
 #include "itemdelegate.h"
 #include <QLineEdit>
 //#include <QIntValidator>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1018</width>
-    <height>596</height>
+    <width>1443</width>
+    <height>586</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,7 @@
      <property name="horizontalSpacing">
       <number>2</number>
      </property>
-     <item row="3" column="0" colspan="3">
+     <item row="3" column="0" colspan="2">
       <widget class="IronTable" name="tableWidget">
        <property name="alternatingRowColors">
         <bool>true</bool>
@@ -139,25 +139,178 @@
        </column>
       </widget>
      </item>
-     <item row="2" column="0" colspan="3">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+     <item row="3" column="2">
+      <widget class="IronTable" name="tableWidget_2">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+       <attribute name="horizontalHeaderVisible">
+        <bool>true</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>OFFSET</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>00</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>01</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>02</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>03</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>04</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>05</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>06</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>07</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>08</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>09</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0A</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0B</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0C</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0D</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0E</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>0F</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>ASCII - DATA</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="title">
+        <string/>
        </property>
-      </spacer>
+       <widget class="QLineEdit" name="lineEdit_search_string">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="placeholderText">
+         <string>foobar</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_search_string">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>10</y>
+          <width>81</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>search string</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QLineEdit" name="lineEdit_search_bytes">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="placeholderText">
+         <string>AA BB CC DD ...</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_search_bytes">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>10</y>
+          <width>80</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>search bytes</string>
+        </property>
+       </widget>
+      </widget>
      </item>
      <item row="0" column="0">
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
         <string/>
        </property>
-       <widget class="QLineEdit" name="lineEdit">
+       <widget class="QLineEdit" name="lineEdit_goto_offset">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -182,7 +335,7 @@
          <string>Offset 00h</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="pushButton_goto_offset">
         <property name="geometry">
          <rect>
           <x>130</x>
@@ -197,71 +350,25 @@
        </widget>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="title">
-        <string/>
+     <item row="3" column="3">
+      <widget class="QScrollBar" name="verticalScrollBar">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QLineEdit" name="lineEdit_2">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>201</width>
-          <height>25</height>
-         </rect>
-        </property>
-        <property name="placeholderText">
-         <string>AA BB CC DD ...</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pushButton_2">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>10</y>
-          <width>80</width>
-          <height>25</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>search bytes</string>
-        </property>
-       </widget>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="title">
-        <string/>
+     <item row="2" column="0" colspan="4">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-       <widget class="QLineEdit" name="lineEdit_3">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>201</width>
-          <height>25</height>
-         </rect>
-        </property>
-        <property name="placeholderText">
-         <string>foobar</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pushButton_3">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>10</y>
-          <width>81</width>
-          <height>25</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>search string</string>
-        </property>
-       </widget>
-      </widget>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </widget>
@@ -271,7 +378,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1018</width>
+     <width>1443</width>
      <height>22</height>
     </rect>
    </property>
@@ -280,10 +387,12 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionLoad2"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionClose"/>
     <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -302,7 +411,7 @@
      <normaloff>:/imgs/imgs/Open.bmp</normaloff>:/imgs/imgs/Open.bmp</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Load1</string>
    </property>
   </action>
   <action name="actionSave">
@@ -337,6 +446,21 @@
   <action name="actionPaste">
    <property name="text">
     <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionLoad2">
+   <property name="icon">
+    <iconset>
+     <normalon>:/imgs/imgs/Open.bmp</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Load2</string>
    </property>
   </action>
  </widget>
