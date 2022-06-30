@@ -331,8 +331,11 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
         <property name="placeholderText">
-         <string>Offset 00h</string>
+         <string>0x000000</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_goto_offset">

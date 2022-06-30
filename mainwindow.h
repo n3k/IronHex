@@ -23,7 +23,9 @@ QT_END_NAMESPACE
 struct TableContext {
     QTableWidget *table;
     QByteArray _content;
+    /// The number of required rows for the current content
     size_t _content_rows;
+    /// The col number on which the content ends in the last row
     size_t _content_last_column;
     QMap<int, int> string_map;
 };
@@ -60,6 +62,8 @@ private slots:
 
     void on_actionLoad2_triggered();
 
+    void on_pushButton_goto_offset_clicked();
+
 private:
     bool bInitialLoadDone;
     void re_load_table_content(QByteArray &text, struct TableContext *t_ctx);
@@ -75,25 +79,14 @@ private:
 
 
     Ui::MainWindow *ui;
+
     QString currentFile1 = "";
-
-    QByteArray _content1;
-    /// The number of required rows for the current content
-    size_t _content1_rows;
-    /// The col number on which the content ends in the last row
-    size_t _content1_last_column;
-
     struct TableContext table1_ctx;
 
     QRegularExpression rx_copypaste;
 
-    QMap<int, int> qstring_map;
-
-
 
     QString currentFile2 = "";
-
-
     struct TableContext table2_ctx;
 
 

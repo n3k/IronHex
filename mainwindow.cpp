@@ -31,9 +31,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->tableWidget_2->resizeColumnsToContents();
 
-//    connect(view1->horizontalScrollBar(), SIGNAL(valueChanged(int)), view2->horizontalScrollBar(), SLOT(setValue(int)));
-//    connect(view2->horizontalScrollBar(), SIGNAL(valueChanged(int)), view1->horizontalScrollBar(), SLOT(setValue(int)));
-
       connect(this->ui->verticalScrollBar, SIGNAL(valueChanged(int)), this->ui->tableWidget->verticalScrollBar(), SLOT(setValue(int)));
       connect(this->ui->verticalScrollBar, SIGNAL(valueChanged(int)), this->ui->tableWidget_2->verticalScrollBar(), SLOT(setValue(int)));
 
@@ -305,12 +302,6 @@ void MainWindow::set_strings_bg_color(struct TableContext *t_ctx) {
     }
 }
 
-/*
-Feature list
-. Determine strings and mark them with a different background colour in the hexdump
-. Implement Insert Zeros
-. implement save
-*/
 
 /// This function receives a row and column index and returns the
 /// next row and column indexes
@@ -598,5 +589,19 @@ void MainWindow::do_diff() {
 
 
 
+}
+
+
+void MainWindow::on_pushButton_goto_offset_clicked()
+{
+    std::string offset_str = this->ui->lineEdit_goto_offset->text().toStdString();
+    unsigned long offset = strtoul(offset_str.c_str(), 0, 16);
+    int row = 0;
+    int col = 0;
+    map_offset_to_cell(offset, &row, &col);
+    QTableWidgetItem *item = table1_ctx.table->item(row, col);
+    if (item != NULL) {
+        this->table1_ctx.table->scrollToItem(item);
+    }
 }
 
