@@ -64,12 +64,14 @@ private slots:
 
     void on_pushButton_goto_offset_clicked();
 
+    void on_pushButton_search_bytes_clicked();
+
 private:
     bool bInitialLoadDone;
-    void re_load_table_content(QByteArray &text, struct TableContext *t_ctx);
+    void re_load_table_content(struct TableContext *t_ctx);
     void reload_content(struct TableContext *t_ctx);
     void next_hex_cell(int *r, int *c, struct TableContext *t_ctx);
-    void find_strings_in_data(QByteArray &data, struct TableContext *t_ctx);
+    void find_strings_in_data(struct TableContext *t_ctx);
     void set_strings_bg_color(struct TableContext *t_ctx);
     void map_offset_to_cell(size_t offset, int *r, int *c);
 

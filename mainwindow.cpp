@@ -3,6 +3,35 @@
 #include "itemdelegate.h"
 #include <QClipboard>
 
+void *
+memmem(const void *l, size_t l_len, const void *s, size_t s_len)
+{
+    char *cur, *last;
+    const char *cl = (const char *)l;
+    const char *cs = (const char *)s;
+
+    /* we need something to compare */
+    if (l_len == 0 || s_len == 0)
+        return NULL;
+
+    /* "s" must be smaller or equal to "l" */
+    if (l_len < s_len)
+        return NULL;
+
+    /* special case where s_len == 1 */
+    if (s_len == 1)
+        return (void *)memchr(l, (int)*cs, l_len);
+
+    /* the last position where its possible to find "s" in "l" */
+    last = (char *)cl + l_len - s_len;
+
+    for (cur = (char *)cl; cur <= last; cur++)
+        if (cur[0] == cs[0] && memcmp(cur, cs, s_len) == 0)
+            return cur;
+
+    return NULL;
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -37,6 +66,14 @@ MainWindow::MainWindow(QWidget *parent)
       connect(this->ui->tableWidget->verticalScrollBar(),
               SIGNAL(rangeChanged(int, int)),
               this->ui->verticalScrollBar, SLOT(setRange(int, int)));
+
+
+      QRegularExpression rx("[aA|bB|cC|dD|eE|fF|\\d]{1,8}");
+      QValidator *validator = new QRegularExpressionValidator(rx, this);
+      ui->lineEdit_goto_offset->setValidator( validator );
+
+      QValidator *validator1 = new QRegularExpressionValidator(rx_copypaste, this);
+      ui->lineEdit_search_bytes->setValidator( validator1 );
 }
 
 MainWindow::~MainWindow()
@@ -124,11 +161,11 @@ void MainWindow::re_load_ascii_area(struct TableContext *t_ctx) {
 
 /// This method will load or reload the entire content of the table
 /// based on the input bytearray
-void MainWindow::re_load_table_content(QByteArray &text, struct TableContext *t_ctx) {
+void MainWindow::re_load_table_content(struct TableContext *t_ctx) {
 
     t_ctx->table->clearContents();
 
-    size_t text_len = text.size();
+    size_t text_len = t_ctx->_content.size();
     size_t lines_16 = text_len >> 4;
     lines_16 += ((text_len & 0b1111) != 0) ? 1: 0;
     size_t needed_rows = lines_16;
@@ -146,9 +183,9 @@ void MainWindow::re_load_table_content(QByteArray &text, struct TableContext *t_
         size_t rem = text_len - p;
         offset_vec.push_back(str1.sprintf("%08zxh", p));
         if (rem < 16) {
-            ba = text.mid(p, rem);
+            ba = t_ctx->_content.mid(p, rem);
         } else {
-            ba = text.mid(p, 16);
+            ba = t_ctx->_content.mid(p, 16);
         }
 
         data_vec.push_back(ba);
@@ -192,7 +229,7 @@ void MainWindow::re_load_table_content(QByteArray &text, struct TableContext *t_
                 if (offset >= text_len) {
                     continue; // Continue because we need to still set COLUMN_ASCII_DATA for this row
                 }
-                unsigned char b = text.at(offset);
+                unsigned char b = t_ctx->_content.at(offset);
 
                 QString hexbyte_str;                
                 item->setText(hexbyte_str.sprintf("%02X", b));
@@ -226,16 +263,16 @@ void MainWindow::map_offset_to_cell(size_t offset, int *r, int *c) {
     *c = (offset & 0b1111) + COLUMN_FIRST_HEX_BYTE;
 }
 
-void MainWindow::find_strings_in_data(QByteArray &data, struct TableContext *t_ctx) {
+void MainWindow::find_strings_in_data(struct TableContext *t_ctx) {
     t_ctx->string_map.clear();
 
     int i = 0;
     size_t str_len = 0;
     char *ptr;
-    while (i < data.length()) {
-        unsigned char c = (unsigned char ) data.at(i);
+    while (i < t_ctx->_content.length()) {
+        unsigned char c = (unsigned char ) t_ctx->_content.at(i);
         if (c >= 0x20 && c <= 0x7f) {
-            ptr = data.data();
+            ptr = t_ctx->_content.data();
             ptr += i;
             str_len = ascii_strlen(ptr);
             if (str_len >= 3) {
@@ -269,13 +306,13 @@ void MainWindow::on_actionOpen_triggered()
 
     setWindowTitle(filename);
 
-    QByteArray text = file.readAll();
+    table1_ctx._content = file.readAll();
 
     // find strings
-    find_strings_in_data(text, &this->table1_ctx);
+    find_strings_in_data(&this->table1_ctx);
 
     // fill table
-    re_load_table_content(text, &this->table1_ctx);
+    re_load_table_content(&this->table1_ctx);
     bInitialLoadDone = true;
 
     // set color for strings
@@ -449,7 +486,7 @@ void MainWindow::handle_ctrl_v(int r, int c, struct TableContext *t_ctx) {
     }
 
     re_load_ascii_area(t_ctx);
-    find_strings_in_data(t_ctx->_content, t_ctx);
+    find_strings_in_data(t_ctx);
     set_strings_bg_color(t_ctx);
 }
 
@@ -554,10 +591,10 @@ void MainWindow::on_actionLoad2_triggered()
         QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
     }
 
-    QByteArray text = file.readAll();
+    this->table2_ctx._content = file.readAll();
 
     // fill table
-    re_load_table_content(text, &this->table2_ctx);
+    re_load_table_content(&this->table2_ctx);
 
 
     do_diff();
@@ -567,8 +604,6 @@ void MainWindow::on_actionLoad2_triggered()
 
 
 void MainWindow::do_diff() {
-    reload_content(&this->table1_ctx);
-    reload_content(&this->table2_ctx);
 
     int len1 = this->table1_ctx._content.size();
     int len2 = this->table2_ctx._content.size();
@@ -602,6 +637,33 @@ void MainWindow::on_pushButton_goto_offset_clicked()
     QTableWidgetItem *item = table1_ctx.table->item(row, col);
     if (item != NULL) {
         this->table1_ctx.table->scrollToItem(item);
+    }
+}
+
+
+void MainWindow::on_pushButton_search_bytes_clicked()
+{
+    QString search_bytes_str = this->ui->lineEdit_search_bytes->text();
+    QByteArray hexbytes      = search_bytes_str.replace(" ", "").toUtf8();
+
+    void *ocurrence = memmem(table1_ctx._content.data_ptr(), table1_ctx._content.size(), hexbytes.data_ptr(), hexbytes.size());
+    printf("Ocurrence: %p\n", ocurrence);
+
+    if (ocurrence != NULL) {
+        size_t offset = ((char *)ocurrence - (char *)table1_ctx._content.data_ptr());
+        int row, col;
+        map_offset_to_cell(offset, &row, &col);
+
+        QTableWidgetItem *item = table1_ctx.table->item(row, col);
+        if (item != NULL) {
+            this->table1_ctx.table->scrollToItem(item);
+
+            for (int i = 0 ; i < hexbytes.size(); i++) {
+                item->setBackground(Qt::magenta);
+                next_hex_cell(&row, &col, &table1_ctx);
+                item = table1_ctx.table->item(row, col);
+            }
+        }
     }
 }
 
