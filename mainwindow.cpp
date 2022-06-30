@@ -45,20 +45,30 @@ void MainWindow::reload_content() {
     _content.clear();
 
     QString text = "";
-    for(int i = 0 ; i < ui->tableWidget->rowCount(); i++) {
-        for (int j = 0; j < ui->tableWidget->columnCount(); j++) {
-            if (j == COLUMN_OFFSET || j == COLUMN_ASCII_DATA) {
-                continue;
-            }
+    for(int i = 0 ; i < this->_content_rows; i++) {
+        for (int j = COLUMN_FIRST_HEX_BYTE; j <= COLUMN_LAST_HEX_BYTE; j++) {
 
             QTableWidgetItem *item = ui->tableWidget->item(i, j);
-            QString hexbyte_str = item->text();
-            text += hexbyte_str;
+
+            if (i == (_content_rows - 1) && j > _content_last_column) {
+                // This case is where we're on the last row and we consumed
+                // all the columns with data for this row.
+                break;
+            }
+
+//            if (i >= (_content_rows - 1))
+//                printf("Realoding cell r[%d]c[%d]\n", i, j);
+
+            std::string hexbyte_str = item->text().toStdString();
+
+            unsigned long v = strtoul(hexbyte_str.c_str(), 0, 16);
+//            if (hexbyte_str == "0D") {
+//                QString str;
+//                QMessageBox::warning(this, "Warning", str.sprintf("0D found: %02x", v));
+//            }
+            _content.push_back(v & 0xff);
         }
     }
-
-     //QMessageBox::warning(this, "Warning", text);
-    _content = QByteArray::fromHex(text.toUtf8());
 }
 
 /// This method only reloads the ascii-strings portion of the table
@@ -83,10 +93,11 @@ void MainWindow::re_load_ascii_area() {
         p += 16;
     }
 
-    for(int i = 0 ; i < ui->tableWidget->rowCount(); i++) {
+    for(int i = 0 ; i < _content_rows; i++) {
         QByteArray data_line = data_vec.at(i);
 
         QTableWidgetItem *item = ui->tableWidget->item(i, COLUMN_ASCII_DATA);
+        //printf("Reloading ascii row: %d - %p\n", i, item);
         item->setText(get_non_ascii_chars_version(data_line));
         item->setBackgroundColor(Qt::lightGray);
         item->setFlags(Qt::ItemIsEnabled);
@@ -98,10 +109,13 @@ void MainWindow::re_load_ascii_area() {
 /// based on the input bytearray
 void MainWindow::re_load_table_content(QByteArray &text) {
 
-    size_t text_len = text.length();
+    ui->tableWidget->clearContents();
+
+    size_t text_len = text.size();
     size_t lines_16 = text_len >> 4;
     lines_16 += ((text_len & 0b1111) != 0) ? 1: 0;
-    size_t rows = lines_16;
+    size_t needed_rows = lines_16;
+    this->_content_rows = needed_rows;
 
     const size_t column_num = ui->tableWidget->columnCount();
 
@@ -110,27 +124,36 @@ void MainWindow::re_load_table_content(QByteArray &text) {
 
     size_t p = 0;
     QString str1;
-    QByteArray str;
+    QByteArray ba;
     while (p < text_len) {
         size_t rem = text_len - p;
         offset_vec.push_back(str1.sprintf("%08zxh", p));
         if (rem < 16) {
-            str = text.mid(p, rem);
+            ba = text.mid(p, rem);
         } else {
-            str = text.mid(p, 16);
+            ba = text.mid(p, 16);
         }
 
-        data_vec.push_back(str);
+        data_vec.push_back(ba);
         p += 16;
     }
 
-    for(size_t i = 0; i < rows; i++) {
+    // Allocate ROWs for current content
+    int additional_rows = needed_rows - ui->tableWidget->rowCount();
+
+    while (additional_rows > 0) {
         ui->tableWidget->insertRow ( ui->tableWidget->rowCount() );
+        additional_rows--;
+    }
+
+    size_t offset = 0;
+    for(size_t i = 0; i < needed_rows; i++) {
 
         QByteArray data_line = data_vec.at(i);
 
         for(size_t j = 0; j < column_num; j++)
         {
+
             QTableWidgetItem *item = ui->tableWidget->item(i, j);
             if(!item) {
                 item = new QTableWidgetItem();
@@ -141,18 +164,26 @@ void MainWindow::re_load_table_content(QByteArray &text) {
                 item->setText(offset_vec.at(i));
                 item->setBackgroundColor(Qt::lightGray);
                 item->setFlags(Qt::ItemIsEnabled);
+
             } else if (j == COLUMN_ASCII_DATA) { 
                 item->setText(get_non_ascii_chars_version(data_line));
                 item->setBackgroundColor(Qt::lightGray);
                 item->setFlags(Qt::ItemIsEnabled);
+
             } else {
                 // HEXDUMP COLUMNS
-                QString hexbyte_str;
-                int column_idx = j-1;
-                if (column_idx < data_line.size()) {
-                    unsigned char b = (unsigned char) data_line.at(column_idx);
-                    item->setText(hexbyte_str.sprintf("%02X", b));
-                    item->setTextAlignment(Qt::AlignCenter);
+                if (offset >= text_len) {
+                    continue; // Continue because we need to still set COLUMN_ASCII_DATA for this row
+                }
+                unsigned char b = text.at(offset);
+
+                QString hexbyte_str;                
+                item->setText(hexbyte_str.sprintf("%02X", b));
+                item->setTextAlignment(Qt::AlignCenter);
+                offset++;
+
+                if (offset == text_len) {
+                    _content_last_column = j;
                 }
             }
         }
@@ -173,6 +204,11 @@ size_t ascii_strlen(char *s) {
         s++;
     }
     return size;
+}
+
+void MainWindow::map_offset_to_cell(size_t offset, int *r, int *c) {
+    *r = offset >> 4;
+    *c = (offset & 0b1111) + COLUMN_FIRST_HEX_BYTE;
 }
 
 void MainWindow::find_strings_in_data(QByteArray &data) {
@@ -211,7 +247,7 @@ void MainWindow::on_actionOpen_triggered()
     currentFile = filename;
 
     QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
+    if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
     }
 
@@ -223,7 +259,7 @@ void MainWindow::on_actionOpen_triggered()
     find_strings_in_data(text);
 
     // fill table
-    this->ui->tableWidget->clear();
+    //this->ui->tableWidget->clear();
     re_load_table_content(text);
 
     // set color for strings
@@ -236,8 +272,9 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::set_strings_bg_color() {
 
     for (auto it = qstring_map.begin(); it != qstring_map.end(); ++it) {
-        int cur_row = it.key() >> 4;
-        int cur_col = (it.key() + COLUMN_FIRST_HEX_BYTE) & 0b1111;
+        int cur_row = 0;
+        int cur_col = 0;
+        map_offset_to_cell(it.key(), &cur_row, &cur_col);
 
         for (int i = 0; i < it.value(); i++) {
             //QString str;
@@ -259,23 +296,58 @@ Feature list
 /// This function receives a row and column index and returns the
 /// next row and column indexes
 void MainWindow::next_hex_cell(int *r, int *c) {
+
+    QTableWidgetItem *item;
+    bool bNextRow = false;
+
     int col = *c;
     if (col < COLUMN_LAST_HEX_BYTE) {
         col++;
     } else {
         col = COLUMN_FIRST_HEX_BYTE;
+        bNextRow = true;
     }
     // update c
     *c = col;
 
-    if (col == COLUMN_FIRST_HEX_BYTE) {
-        // This means we wrapped around the cols
+    int row = *r;
+    if (row == (_content_rows - 1)) {
 
-        int row = *r;
-        if (row >= ( this->ui->tableWidget->rowCount() - 1) ) {
-            ui->tableWidget->insertRow ( ui->tableWidget->rowCount() );
+        // If we re on the last ROW and our increased COLUMN is greater than what we tracked before
+        // Then increase the _content_last_column (to col)
+        if (col > _content_last_column) {
+             _content_last_column = col;
+             // Add new item
+             item = this->ui->tableWidget->item(row, col);
+             if (item == NULL) {
+                 QMessageBox::warning(this, "Warning", "adding new COL");
+                 ui->tableWidget->setItem(row, col, new QTableWidgetItem());
+             }
         }
+    }
+
+    if (bNextRow) {
+        // This means we wrapped around the cols
         row++;
+
+        if (row > (_content_rows - 1)) {
+            // Need to add a new row
+            // printf("Adding a new row, because r[%d] and c[%d] - last_column: %d\n", row, col, _content_last_column);
+
+            ui->tableWidget->insertRow ( ui->tableWidget->rowCount() );
+            _content_rows++;
+            _content_last_column = col;
+
+            // Add all the COLUMNS to the new ROW
+            for (int j = COLUMN_OFFSET; j <= COLUMN_ASCII_DATA; j++) {
+                item = this->ui->tableWidget->item(row, j);
+                if (item == NULL) {
+                    ui->tableWidget->setItem(row, j, new QTableWidgetItem());
+                }
+            }
+        }
+
+
         // update r
         *r = row;
     }
@@ -295,6 +367,10 @@ void MainWindow::on_tableWidget_ctrlCPressed(QModelIndexList selected)
 
 void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
 {
+    if (c == COLUMN_OFFSET || c == COLUMN_ASCII_DATA) {
+        return;
+    }
+
     QClipboard *clipboard = QGuiApplication::clipboard();
     QString text          = clipboard->text();
 
@@ -337,12 +413,18 @@ void MainWindow::on_tableWidget_ctrlVPressed(int r, int c)
         QByteArray new_data = text.toUtf8();
         int cur_row = r;
         int cur_col = c;
-        for (int i = 0 ; i < new_data.size(); i++) {
-            unsigned char b = (unsigned char) new_data.at(i);
+        int j = 0;
+        while (j < new_data.size()) {
+            unsigned char b = (unsigned char) new_data.at(j);
+            //printf("Setting val to r[%d]c[%d] - max-rows: %d - last_col: %d\n", cur_row, cur_col, _content_rows, _content_last_column);
             QTableWidgetItem *item = ui->tableWidget->item(cur_row, cur_col);
             QString hexbyte_str;
             item->setText(hexbyte_str.sprintf("%02X", b));
             item->setTextAlignment(Qt::AlignCenter);
+            j++;
+            if (j == new_data.size()) {
+                break;
+            }
             next_hex_cell(&cur_row, &cur_col);
         }
     }
@@ -362,7 +444,7 @@ void MainWindow::on_actionSave_As_triggered()
     currentFile = filename;
 
     QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
+    if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::warning(this, "Warning", "Cannot write file: " + file.errorString());
     }
 
@@ -379,7 +461,7 @@ void MainWindow::on_actionSave_triggered()
     reload_content();
 
     QFile file(currentFile);
-    if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
+    if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::warning(this, "Warning", "Cannot write file: " + file.errorString());
     }
 
@@ -392,6 +474,27 @@ void MainWindow::on_actionSave_triggered()
 void MainWindow::on_actionClose_triggered()
 {
     _content.clear();
+    this->_content_last_column = 0;
+    this->_content_rows        = 0;
+
+    this->ui->tableWidget->clearContents();
+}
+
+
+void MainWindow::on_actionCopy_triggered()
+{
+    on_tableWidget_ctrlCPressed(this->ui->tableWidget->get_selected_indexes());
+}
+
+
+void MainWindow::on_actionPaste_triggered()
+{
+    on_tableWidget_ctrlVPressed(ui->tableWidget->currentRow(), ui->tableWidget->currentColumn());
+}
+
+
+void MainWindow::on_actionExit_triggered()
+{
     exit(0);
 }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1019</width>
-    <height>551</height>
+    <width>1018</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,58 +39,7 @@
      <property name="horizontalSpacing">
       <number>2</number>
      </property>
-     <item row="1" column="0" colspan="3">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButton">
-       <property name="minimumSize">
-        <size>
-         <width>320</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>320</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>go</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="minimumSize">
-        <size>
-         <width>110</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>110</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="placeholderText">
-        <string>Offset 00h</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" colspan="3">
+     <item row="3" column="0" colspan="3">
       <widget class="IronTable" name="tableWidget">
        <property name="alternatingRowColors">
         <bool>true</bool>
@@ -190,6 +139,130 @@
        </column>
       </widget>
      </item>
+     <item row="2" column="0" colspan="3">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="0">
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>110</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>110</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="placeholderText">
+         <string>Offset 00h</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>130</x>
+          <y>10</y>
+          <width>171</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>go</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QLineEdit" name="lineEdit_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="placeholderText">
+         <string>AA BB CC DD ...</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>10</y>
+          <width>80</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>search bytes</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QLineEdit" name="lineEdit_3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="placeholderText">
+         <string>foobar</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_3">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>10</y>
+          <width>81</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>search string</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -198,7 +271,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1019</width>
+     <width>1018</width>
      <height>22</height>
     </rect>
    </property>
@@ -216,11 +289,8 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
+    <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
-    <addaction name="actionUndo_2"/>
-    <addaction name="actionRedo_2"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -254,41 +324,19 @@
     <string>Close</string>
    </property>
   </action>
-  <action name="actionUndo">
+  <action name="actionCopy">
    <property name="icon">
-    <iconset resource="Resources.qrc">
-     <normaloff>:/imgs/imgs/Copy.bmp</normaloff>:/imgs/imgs/Copy.bmp</iconset>
+    <iconset>
+     <normalon>:/imgs/imgs/Copy.bmp</normalon>
+    </iconset>
    </property>
    <property name="text">
     <string>Copy</string>
    </property>
   </action>
-  <action name="actionRedo">
-   <property name="icon">
-    <iconset resource="Resources.qrc">
-     <normaloff>:/imgs/imgs/Cut.bmp</normaloff>:/imgs/imgs/Cut.bmp</iconset>
-   </property>
-   <property name="text">
-    <string>Cut</string>
-   </property>
-  </action>
   <action name="actionPaste">
-   <property name="icon">
-    <iconset resource="Resources.qrc">
-     <normaloff>:/imgs/imgs/Paste.bmp</normaloff>:/imgs/imgs/Paste.bmp</iconset>
-   </property>
    <property name="text">
     <string>Paste</string>
-   </property>
-  </action>
-  <action name="actionUndo_2">
-   <property name="text">
-    <string>Undo</string>
-   </property>
-  </action>
-  <action name="actionRedo_2">
-   <property name="text">
-    <string>Redo</string>
    </property>
   </action>
  </widget>

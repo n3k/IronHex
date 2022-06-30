@@ -11,6 +11,11 @@ class IronTable:public QTableWidget
    Q_OBJECT
    public:
       IronTable(QWidget* parent=0):QTableWidget(parent){}
+
+      QModelIndexList get_selected_indexes() {
+          return this->selectedIndexes();
+      };
+
    protected:
       void keyPressEvent(QKeyEvent *e)
       {

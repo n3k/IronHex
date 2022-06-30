@@ -41,6 +41,11 @@ private slots:
     void on_actionSave_triggered();
 
     void on_actionClose_triggered();
+    void on_actionCopy_triggered();
+
+    void on_actionPaste_triggered();
+
+    void on_actionExit_triggered();
 
 private:
     bool bInitialLoadDone;
@@ -49,12 +54,17 @@ private:
     void next_hex_cell(int *r, int *c);
     void find_strings_in_data(QByteArray &data);
     void set_strings_bg_color();
+    void map_offset_to_cell(size_t offset, int *r, int *c);
 
 
     Ui::MainWindow *ui;
     QString currentFile = "";
 
     QByteArray _content;
+    /// The number of required rows for the current content
+    size_t _content_rows;
+    /// The col number on which the content ends in the last row
+    size_t _content_last_column;
 
     QRegularExpression rx_copypaste;
 
